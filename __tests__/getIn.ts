@@ -13,6 +13,22 @@ describe('getIn', () => {
     expect(getIn(m, fromJS(['a', 'b', 'c']))).toEqual(10);
   });
 
+  it('deep get with an array-like keyPath', () => {
+    const m = fromJS({ a: { b: { c: 10 } } });
+    const keyPath = { 0: 'a', 1: 'b', 2: 'c', length: 3 };
+    expect(m.getIn(keyPath)).toEqual(10);
+    expect(getIn(m, keyPath)).toEqual(10);
+  });
+
+  it('deep get with an arguments keyPath', () => {
+    const m = fromJS({ a: { b: { c: 10 } } });
+    function read(..._keys: Array<string>) {
+      // eslint-disable-next-line prefer-rest-params
+      return getIn(m, arguments);
+    }
+    expect(read('a', 'b', 'c')).toEqual(10);
+  });
+
   it('deep get throws without list or array-like', () => {
     // @ts-expect-error -- test that runtime does throw
     expect(() => Map().getIn(undefined)).toThrow(

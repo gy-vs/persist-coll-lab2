@@ -29,6 +29,53 @@ describe('updateIn', () => {
     ).toEqual({ a: { b: { c: 20 } } });
   });
 
+  it('deep edit with an array-like keyPath', () => {
+    const m = fromJS({ a: { b: { c: 10 } } });
+    const keyPath = { 0: 'a', 1: 'b', 2: 'c', length: 3 };
+    const updater = (value: unknown) => Number(value) * 2;
+    expect(m.updateIn(keyPath, updater).toJS()).toEqual({
+      a: { b: { c: 20 } },
+    });
+    expect(updateIn(m, keyPath, updater).toJS()).toEqual({
+      a: { b: { c: 20 } },
+    });
+    expect(m.setIn(keyPath, 20).toJS()).toEqual({ a: { b: { c: 20 } } });
+    expect(setIn(m, keyPath, 20).toJS()).toEqual({ a: { b: { c: 20 } } });
+    expect(m.removeIn(keyPath).toJS()).toEqual({ a: { b: {} } });
+    expect(removeIn(m, keyPath).toJS()).toEqual({ a: { b: {} } });
+  });
+
+  it('deep edit with an arguments keyPath', () => {
+    const m = fromJS({ a: { b: { c: 10 } } });
+    const edit = function (..._keys: Array<string>) {
+      // eslint-disable-next-line prefer-rest-params
+      return updateIn(
+        m,
+        arguments,
+        (value: unknown) => Number(value) * 2
+      ).toJS();
+    };
+    expect(edit('a', 'b', 'c')).toEqual({ a: { b: { c: 20 } } });
+  });
+
+  it('deep edit reports the same path error for array-like as for arrays', () => {
+    const arrayLike = { 0: 'a', 1: 'b', 2: 'c', length: 3 };
+    const expectedError =
+      'Cannot update within non-data-structure value in path ["a"]: 5';
+
+    expect(() => fromJS({ a: 5 }).setIn(['a', 'b', 'c'], 1)).toThrow(
+      expectedError
+    );
+    expect(() => fromJS({ a: 5 }).setIn(arrayLike, 1)).toThrow(expectedError);
+    expect(() => setIn({ a: 5 }, arrayLike, 1)).toThrow(expectedError);
+    expect(() => fromJS({ a: 5 }).updateIn(arrayLike, x => x)).toThrow(
+      expectedError
+    );
+    expect(() => updateIn({ a: 5 }, arrayLike, x => x)).toThrow(expectedError);
+    expect(() => fromJS({ a: 5 }).removeIn(arrayLike)).toThrow(expectedError);
+    expect(() => removeIn({ a: 5 }, arrayLike)).toThrow(expectedError);
+  });
+
   it('deep edit in raw JS', () => {
     const m = { a: { b: { c: [10] } } };
     expect(
@@ -360,6 +407,14 @@ describe('updateIn', () => {
         Map({ a: { x: [1, 2, 3, 4, 5, 6] } })
       );
     });
+
+    it('accepts an array-like keyPath', () => {
+      const m1 = fromJS({ x: { a: 1, b: 2, c: 3 } });
+      const m2 = fromJS({ d: 10, b: 20, e: 30 });
+      expect(m1.mergeIn({ 0: 'x', length: 1 }, m2).toJS()).toEqual({
+        x: { a: 1, b: 20, c: 3, d: 10, e: 30 },
+      });
+    });
   });
 
   describe('mergeDeepIn', () => {
@@ -400,6 +455,14 @@ describe('updateIn', () => {
       expect(m.mergeDeepIn(['a'], { x: [4, 5, 6] })).toEqual(
         Map({ a: { x: [1, 2, 3, 4, 5, 6] } })
       );
+    });
+
+    it('accepts an array-like keyPath', () => {
+      const m1 = fromJS({ x: { a: 1, b: 2, c: 3 } });
+      const m2 = fromJS({ d: 10, b: 20, e: 30 });
+      expect(m1.mergeDeepIn({ 0: 'x', length: 1 }, m2).toJS()).toEqual({
+        x: { a: 1, b: 20, c: 3, d: 10, e: 30 },
+      });
     });
   });
 });
