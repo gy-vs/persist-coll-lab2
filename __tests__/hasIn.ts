@@ -20,6 +20,20 @@ describe('hasIn', () => {
     expect(hasIn(m, fromJS(['a', 'y', 'z']))).toEqual(false);
   });
 
+  it('deep has with array-like keyPath', () => {
+    const m = fromJS({ a: { b: { c: 10 } } });
+    expect(m.hasIn({ 0: 'a', 1: 'b', 2: 'c', length: 3 })).toEqual(true);
+    expect(m.hasIn({ 0: 'a', 1: 'b', 2: 'z', length: 3 })).toEqual(false);
+    expect(hasIn(m, { 0: 'a', 1: 'b', 2: 'c', length: 3 })).toEqual(true);
+    expect(hasIn(m, { 0: 'a', 1: 'y', 2: 'z', length: 3 })).toEqual(false);
+
+    const hasPath = function (_key1: string, _key2: string, _key3: string) {
+      return m.hasIn(arguments);
+    };
+    expect(hasPath('a', 'b', 'c')).toEqual(true);
+    expect(hasPath('a', 'y', 'z')).toEqual(false);
+  });
+
   it('deep has throws without list or array-like', () => {
     // @ts-expect-error -- test that runtime does throw
     expect(() => Map().hasIn(undefined)).toThrow(

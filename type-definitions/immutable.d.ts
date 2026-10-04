@@ -96,6 +96,19 @@ declare namespace Immutable {
   /** @ignore */
   type OnlyObject<T> = Extract<T, object>;
 
+  /**
+   * Path of keys used by the `getIn`, `setIn`, `updateIn`, `removeIn`,
+   * `hasIn` and `mergeIn` family of functions.
+   *
+   * Besides iterables (like arrays or Immutable ordered Collections), the
+   * runtime also accepts array-like objects, for example `arguments` or
+   * `{ 0: 'address', 1: 'city', length: 2 }` as produced by template
+   * compilers.
+   *
+   * @ignore
+   */
+  export type KeyPath<T = unknown> = Iterable<T> | ArrayLike<T>;
+
   /** @ignore */
   type ContainObject<T> = OnlyObject<T> extends object
     ? OnlyObject<T> extends never
@@ -512,7 +525,7 @@ declare namespace Immutable {
      *
      * Note: `setIn` can be used in `withMutations`.
      */
-    setIn(keyPath: Iterable<unknown>, value: unknown): this;
+    setIn(keyPath: KeyPath, value: unknown): this;
 
     /**
      * Returns a new List having removed the value at this `keyPath`. If any
@@ -542,8 +555,8 @@ declare namespace Immutable {
      *
      * @alias removeIn
      */
-    deleteIn(keyPath: Iterable<unknown>): this;
-    removeIn(keyPath: Iterable<unknown>): this;
+    deleteIn(keyPath: KeyPath): this;
+    removeIn(keyPath: KeyPath): this;
 
     /**
      * Note: `updateIn` can be used in `withMutations`.
@@ -551,31 +564,25 @@ declare namespace Immutable {
      * @see `Map#updateIn`
      */
     updateIn(
-      keyPath: Iterable<unknown>,
+      keyPath: KeyPath,
       notSetValue: unknown,
       updater: (value: unknown) => unknown
     ): this;
-    updateIn(
-      keyPath: Iterable<unknown>,
-      updater: (value: unknown) => unknown
-    ): this;
+    updateIn(keyPath: KeyPath, updater: (value: unknown) => unknown): this;
 
     /**
      * Note: `mergeIn` can be used in `withMutations`.
      *
      * @see `Map#mergeIn`
      */
-    mergeIn(keyPath: Iterable<unknown>, ...collections: Array<unknown>): this;
+    mergeIn(keyPath: KeyPath, ...collections: Array<unknown>): this;
 
     /**
      * Note: `mergeDeepIn` can be used in `withMutations`.
      *
      * @see `Map#mergeDeepIn`
      */
-    mergeDeepIn(
-      keyPath: Iterable<unknown>,
-      ...collections: Array<unknown>
-    ): this;
+    mergeDeepIn(keyPath: KeyPath, ...collections: Array<unknown>): this;
 
     // Transient changes
 
@@ -862,6 +869,7 @@ declare namespace Immutable {
       searchKeyPath: [...P],
       notSetValue?: unknown
     ): RetrievePath<R, P>;
+    getIn(searchKeyPath: KeyPath, notSetValue?: unknown): unknown;
 
     set<K extends keyof R>(key: K, value: R[K]): this;
 
@@ -1310,7 +1318,7 @@ declare namespace Immutable {
      *
      * Note: `setIn` can be used in `withMutations`.
      */
-    setIn(keyPath: Iterable<unknown>, value: unknown): this;
+    setIn(keyPath: KeyPath, value: unknown): this;
 
     /**
      * Returns a new Map having removed the value at this `keyPath`. If any keys
@@ -1320,8 +1328,8 @@ declare namespace Immutable {
      *
      * @alias removeIn
      */
-    deleteIn(keyPath: Iterable<unknown>): this;
-    removeIn(keyPath: Iterable<unknown>): this;
+    deleteIn(keyPath: KeyPath): this;
+    removeIn(keyPath: KeyPath): this;
 
     /**
      * Returns a new Map having applied the `updater` to the entry found at the
@@ -1400,14 +1408,11 @@ declare namespace Immutable {
      * Note: `updateIn` can be used in `withMutations`.
      */
     updateIn(
-      keyPath: Iterable<unknown>,
+      keyPath: KeyPath,
       notSetValue: unknown,
       updater: (value: unknown) => unknown
     ): this;
-    updateIn(
-      keyPath: Iterable<unknown>,
-      updater: (value: unknown) => unknown
-    ): this;
+    updateIn(keyPath: KeyPath, updater: (value: unknown) => unknown): this;
 
     /**
      * A combination of `updateIn` and `merge`, returning a new Map, but
@@ -1421,7 +1426,7 @@ declare namespace Immutable {
      *
      * Note: `mergeIn` can be used in `withMutations`.
      */
-    mergeIn(keyPath: Iterable<unknown>, ...collections: Array<unknown>): this;
+    mergeIn(keyPath: KeyPath, ...collections: Array<unknown>): this;
 
     /**
      * A combination of `updateIn` and `mergeDeep`, returning a new Map, but
@@ -1435,10 +1440,7 @@ declare namespace Immutable {
      *
      * Note: `mergeDeepIn` can be used in `withMutations`.
      */
-    mergeDeepIn(
-      keyPath: Iterable<unknown>,
-      ...collections: Array<unknown>
-    ): this;
+    mergeDeepIn(keyPath: KeyPath, ...collections: Array<unknown>): this;
 
     // Transient changes
 
@@ -2887,8 +2889,8 @@ declare namespace Immutable {
 
     // Reading deep values
 
-    hasIn(keyPath: Iterable<unknown>): boolean;
-    getIn(keyPath: Iterable<unknown>): unknown;
+    hasIn(keyPath: KeyPath): boolean;
+    getIn(keyPath: KeyPath): unknown;
 
     // Value equality
 
@@ -2935,22 +2937,16 @@ declare namespace Immutable {
 
     // Deep persistent changes
 
-    setIn(keyPath: Iterable<unknown>, value: unknown): this;
-    updateIn(
-      keyPath: Iterable<unknown>,
-      updater: (value: unknown) => unknown
-    ): this;
-    mergeIn(keyPath: Iterable<unknown>, ...collections: Array<unknown>): this;
-    mergeDeepIn(
-      keyPath: Iterable<unknown>,
-      ...collections: Array<unknown>
-    ): this;
+    setIn(keyPath: KeyPath, value: unknown): this;
+    updateIn(keyPath: KeyPath, updater: (value: unknown) => unknown): this;
+    mergeIn(keyPath: KeyPath, ...collections: Array<unknown>): this;
+    mergeDeepIn(keyPath: KeyPath, ...collections: Array<unknown>): this;
 
     /**
      * @alias removeIn
      */
-    deleteIn(keyPath: Iterable<unknown>): this;
-    removeIn(keyPath: Iterable<unknown>): this;
+    deleteIn(keyPath: KeyPath): this;
+    removeIn(keyPath: KeyPath): this;
 
     // Conversion to JavaScript types
 
@@ -4435,13 +4431,13 @@ declare namespace Immutable {
      * deepData.getIn(['x', 0, 'y']) // 123
      * ```
      */
-    getIn(searchKeyPath: Iterable<unknown>, notSetValue?: unknown): unknown;
+    getIn(searchKeyPath: KeyPath, notSetValue?: unknown): unknown;
 
     /**
      * True if the result of following a path of keys or indices through nested
      * Collections results in a set value.
      */
-    hasIn(searchKeyPath: Iterable<unknown>): boolean;
+    hasIn(searchKeyPath: KeyPath): boolean;
 
     // Persistent changes
 
@@ -5879,7 +5875,7 @@ declare namespace Immutable {
    */
   function getIn(
     collection: unknown,
-    keyPath: Iterable<unknown>,
+    keyPath: KeyPath,
     notSetValue?: unknown
   ): unknown;
 
@@ -5896,7 +5892,7 @@ declare namespace Immutable {
    * hasIn({ x: { y: { z: 123 }}}, ['x', 'q', 'p']) // false
    * ```
    */
-  function hasIn(collection: unknown, keyPath: Iterable<unknown>): boolean;
+  function hasIn(collection: unknown, keyPath: KeyPath): boolean;
 
   /**
    * Returns a copy of the collection with the value at the key path removed.
@@ -5912,7 +5908,7 @@ declare namespace Immutable {
    * console.log(original) // { x: { y: { z: 123 }}}
    * ```
    */
-  function removeIn<C>(collection: C, keyPath: Iterable<unknown>): C;
+  function removeIn<C>(collection: C, keyPath: KeyPath): C;
 
   /**
    * Returns a copy of the collection with the value at the key path set to the
@@ -5929,11 +5925,7 @@ declare namespace Immutable {
    * console.log(original) // { x: { y: { z: 123 }}}
    * ```
    */
-  function setIn<C>(
-    collection: C,
-    keyPath: Iterable<unknown>,
-    value: unknown
-  ): C;
+  function setIn<C>(collection: C, keyPath: KeyPath, value: unknown): C;
 
   /**
    * Returns a copy of the collection with the value at key path set to the
@@ -5952,12 +5944,12 @@ declare namespace Immutable {
    */
   function updateIn<C>(
     collection: C,
-    keyPath: Iterable<unknown>,
+    keyPath: KeyPath,
     updater: (value: unknown) => unknown
   ): C;
   function updateIn<C>(
     collection: C,
-    keyPath: Iterable<unknown>,
+    keyPath: KeyPath,
     notSetValue: unknown,
     updater: (value: unknown) => unknown
   ): C;

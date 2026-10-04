@@ -13,6 +13,28 @@ describe('getIn', () => {
     expect(getIn(m, fromJS(['a', 'b', 'c']))).toEqual(10);
   });
 
+  it('deep get with array-like keyPath', () => {
+    const m = fromJS({ a: { b: { c: 10 } } });
+    expect(m.getIn({ 0: 'a', 1: 'b', 2: 'c', length: 3 })).toEqual(10);
+    expect(getIn(m, { 0: 'a', 1: 'b', 2: 'c', length: 3 })).toEqual(10);
+  });
+
+  it('deep get with arguments as keyPath', () => {
+    const m = fromJS({ a: { b: { c: 10 } } });
+    const getPath = function (_key1: string, _key2: string, _key3: string) {
+      return m.getIn(arguments);
+    };
+    const getPathFunctional = function (
+      _key1: string,
+      _key2: string,
+      _key3: string
+    ) {
+      return getIn(m, arguments);
+    };
+    expect(getPath('a', 'b', 'c')).toEqual(10);
+    expect(getPathFunctional('a', 'b', 'c')).toEqual(10);
+  });
+
   it('deep get throws without list or array-like', () => {
     // @ts-expect-error -- test that runtime does throw
     expect(() => Map().getIn(undefined)).toThrow(

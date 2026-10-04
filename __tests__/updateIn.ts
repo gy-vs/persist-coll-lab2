@@ -29,6 +29,33 @@ describe('updateIn', () => {
     ).toEqual({ a: { b: { c: 20 } } });
   });
 
+  it('deep edit with array-like keyPath', () => {
+    const m = fromJS({ a: { b: { c: 10 } } });
+    const arrayLike = { 0: 'a', 1: 'b', 2: 'c', length: 3 };
+    expect(
+      // @ts-expect-error -- type of fromJS may return a MapOf in the future, to help `updateIn` to work, `updateIn` should copy the comportment of `getIn`
+      m.updateIn(arrayLike, (value: number) => value * 2).toJS()
+    ).toEqual({ a: { b: { c: 20 } } });
+    expect(
+      // @ts-expect-error -- `updateIn` should copy the comportment of `getIn`
+      updateIn({ a: { b: { c: 10 } } }, arrayLike, (value: number) => value * 2)
+    ).toEqual({ a: { b: { c: 20 } } });
+
+    const updateWithArguments = function (
+      _key1: string,
+      _key2: string,
+      _key3: string
+    ) {
+      return (
+        // @ts-expect-error -- type of fromJS may return a MapOf in the future, to help `updateIn` to work, `updateIn` should copy the comportment of `getIn`
+        m.updateIn(arguments, (value: number) => value * 2).toJS()
+      );
+    };
+    expect(updateWithArguments('a', 'b', 'c')).toEqual({
+      a: { b: { c: 20 } },
+    });
+  });
+
   it('deep edit in raw JS', () => {
     const m = { a: { b: { c: [10] } } };
     expect(
@@ -70,6 +97,37 @@ describe('updateIn', () => {
     expect(() => nonObj.updateIn(['key', 'foo'], () => 'newval')).toThrow(
       'Cannot update within non-data-structure value in path ["key"]: 123'
     );
+  });
+
+  it('deep edit with array-like keyPath reports the same error as an array', () => {
+    const arrayLike = { 0: 'a', 1: 'b', 2: 'c', length: 3 };
+    const expectedError =
+      'Cannot update within non-data-structure value in path ["a"]: 5';
+
+    expect(() => fromJS({ a: 5 }).setIn(['a', 'b', 'c'], 1)).toThrow(
+      expectedError
+    );
+    expect(() => fromJS({ a: 5 }).setIn(arrayLike, 1)).toThrow(expectedError);
+    expect(() => setIn({ a: 5 }, arrayLike, 1)).toThrow(expectedError);
+
+    expect(() => fromJS({ a: 5 }).updateIn(arrayLike, value => value)).toThrow(
+      expectedError
+    );
+    expect(() => updateIn({ a: 5 }, arrayLike, value => value)).toThrow(
+      expectedError
+    );
+
+    expect(() => fromJS({ a: 5 }).deleteIn(arrayLike)).toThrow(expectedError);
+    expect(() => removeIn({ a: 5 }, arrayLike)).toThrow(expectedError);
+
+    const throwsWithArguments = function (
+      _key1: string,
+      _key2: string,
+      _key3: string
+    ) {
+      updateIn({ a: 5 }, arguments, value => value);
+    };
+    expect(() => throwsWithArguments('a', 'b', 'c')).toThrow(expectedError);
   });
 
   it('identity with notSetValue is still identity', () => {
